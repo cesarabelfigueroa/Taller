@@ -31,7 +31,6 @@ sql.connect(config, function(err) {
 		if (err) console.log(err);
 		app.get('/users', function(req, res) {
 			res.send(recordset);
-
 		});
 	});
 });
