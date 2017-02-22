@@ -1,15 +1,28 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthenticateService } from '../../services/authenticate.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+	selector: 'app-home',
+	templateUrl: './home.component.html',
+	styleUrls: ['./home.component.css'],
+	providers: [AuthenticateService]
 })
+
 export class HomeComponent implements OnInit {
 
-  constructor() { }
+	private users;
 
-  ngOnInit() {
-  }
 
+	constructor(private dataService: AuthenticateService) {
+
+		this.dataService.getUsers().subscribe(
+			data => this.users = data,
+			error => console.log(error),
+			() => console.log(this.users)
+		);
+
+	}
+
+	ngOnInit() {
+	}
 }

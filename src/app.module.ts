@@ -5,6 +5,7 @@ import { HttpModule } from '@angular/http';
 import { HomeComponent } from './components/home/home.component';
 import { LoginComponent } from './components/login/login.controller';
 import { AppComponent } from './components/app/app.controller';
+import { AuthenticateService } from './services/authenticate.service';
 import { routing } from './routes'
 
 
@@ -21,7 +22,7 @@ import { routing } from './routes'
     HttpModule
   ],
   exports: [],
-  providers: [],
+  providers: [AuthenticateService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
