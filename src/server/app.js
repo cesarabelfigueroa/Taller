@@ -5,7 +5,6 @@ var sql = require("mssql");
 
 var app = express();
 
-console.log(process.env.PORT);
 app.set('port', (process.env.PORT || 3000));
 
 
