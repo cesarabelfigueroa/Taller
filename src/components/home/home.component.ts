@@ -13,6 +13,9 @@ export class HomeComponent implements OnInit {
 	private users;
 
 
+
+
+
 	constructor(private dataService: AuthenticateService) {
 
 		this.dataService.getUsers().subscribe(
@@ -20,6 +23,8 @@ export class HomeComponent implements OnInit {
 			error => console.log(error),
 			() => console.log(this.users)
 		);
+
+		console.log('try');
 
 	}
 

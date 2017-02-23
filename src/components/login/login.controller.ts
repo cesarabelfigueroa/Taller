@@ -19,6 +19,7 @@ export class LoginComponent {
 
 	submitLogin() {
 		console.log(this.user);
+		
 	}
 
 }

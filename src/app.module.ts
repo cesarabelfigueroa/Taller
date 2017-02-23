@@ -7,6 +7,7 @@ import { LoginComponent } from './components/login/login.controller';
 import { AppComponent } from './components/app/app.controller';
 import { AuthenticateService } from './services/authenticate.service';
 import { routing } from './routes'
+import {HashLocationStrategy, LocationStrategy, Location} from '@angular/common';
 
 
 @NgModule({
@@ -22,7 +23,9 @@ import { routing } from './routes'
     HttpModule
   ],
   exports: [],
-  providers: [AuthenticateService],
+  providers: [AuthenticateService,
+    {provide: LocationStrategy, useClass: HashLocationStrategy}
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
