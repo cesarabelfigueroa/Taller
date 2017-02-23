@@ -14,6 +14,6 @@ export class AppComponent {
 
 	constructor(router: Router) {
 		this.router = router;
-		this.router.navigate(['/#/login/']);
+		//this.router.navigate(['/#/login/']);
 	}
 }
