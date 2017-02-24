@@ -2,6 +2,7 @@ var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
 var sql = require("mssql");
+var fs = require('fs');
 
 var app = express();
 
@@ -32,6 +33,18 @@ sql.connect(config, function(err) {
 		app.get('/users', function(req, res) {
 			res.send(recordset);
 		});
+	});
+});
+
+app.get('/assets/images/*', function(request, response){
+	var url =  request.url;
+	var type = url.split('.');
+	console.log(url);
+	fs.readFile('..' + url, (err, data) => {
+		if(!err){
+			response.writeHead(200, { 'Content-Type': 'image/' + type.pop() });
+			response.write(data);
+		}
 	});
 });
 

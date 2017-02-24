@@ -6,6 +6,7 @@ import { HomeComponent } from './components/home/home.component';
 import { LoginComponent } from './components/login/login.controller';
 import { AppComponent } from './components/app/app.controller';
 import { AuthenticateService } from './services/authenticate.service';
+import { SignUpComponent } from './components/signup/signup.component';
 import { routing } from './routes'
 import {HashLocationStrategy, LocationStrategy, Location} from '@angular/common';
 
@@ -14,7 +15,8 @@ import {HashLocationStrategy, LocationStrategy, Location} from '@angular/common'
   declarations: [
     AppComponent,
     HomeComponent,
-    LoginComponent
+    LoginComponent,
+    SignUpComponent
   ],
   imports: [
     routing,

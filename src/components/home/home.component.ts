@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthenticateService } from '../../services/authenticate.service';
 
 @Component({
@@ -8,26 +9,12 @@ import { AuthenticateService } from '../../services/authenticate.service';
 	providers: [AuthenticateService]
 })
 
-export class HomeComponent implements OnInit {
+export class HomeComponent {
+	private router;
+	private type;
 
-	private users;
-
-
-
-
-
-	constructor(private dataService: AuthenticateService) {
-
-		this.dataService.getUsers().subscribe(
-			data => this.users = data,
-			error => console.log(error),
-			() => console.log(this.users)
-		);
-
-		console.log('try');
-
-	}
-
-	ngOnInit() {
+	constructor(dataService: AuthenticateService, router: Router) {
+		this.router = router;
+		this.type = 'client';
 	}
 }

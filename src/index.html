@@ -1,14 +1,34 @@
 <!doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Pointo</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-</head>
-<body  class="application">
- 	<app-root>
-	</app-root>
-</body>
+	<head>
+		<meta charset="utf-8">
+		<title>Pointo</title>
+		<base href="/">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="icon" type="image/x-icon" href="favicon.ico">
+	</head>
+	<body  class="application">
+		<div class="ui left demo vertical inverted sidebar labeled icon menu">
+			<a class="item" href='/#/home'>
+				<i class="home icon"></i>
+				Home
+			</a>
+			<a class="item" href='/#/dashboard'>
+				<i class="block layout icon"></i>
+				Dashboard
+			</a>
+			<a class="item" href='/#/settings'>
+				<i class="settings icon"></i>
+				Settings
+			</a>
+			<a class="item" href='/#/help'>
+				<i class="help icon"></i>
+				Help
+			</a>
+		</div>
+		<div class="pusher">
+			<app-root>
+			</app-root>
+		</div>
+	</body>
 </html>

@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { AuthenticateService } from '../../services/authenticate.service';
+import { Router } from '@angular/router';
+
+
 @Component({
 	selector: 'app-root',
 	templateUrl: './login.controller.html',
@@ -10,16 +13,15 @@ import { AuthenticateService } from '../../services/authenticate.service';
 export class LoginComponent {
 
 	private user;
+	private router;
 
 
-	constructor(private dataService: AuthenticateService) {
+	constructor(private dataService: AuthenticateService, router: Router) {
 		this.user = {};
+		this.router = router;
 	}
-
 
 	submitLogin() {
-		console.log(this.user);
-		
+		this.router.navigate(['/home/'])
 	}
-
 }
