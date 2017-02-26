@@ -17,24 +17,24 @@ app.use(bodyParser.urlencoded({
 
 
 
-var config = {
-	user: 'sa',
-	password: '',
-	server: 'localhost',
-	database: 'Pointo'
-};
+// var config = {
+// 	user: 'sa',
+// 	password: '',
+// 	server: 'localhost',
+// 	database: 'Pointo'
+// };
 
-sql.connect(config, function(err) {
-	if (err) console.log(err);
-	var request = new sql.Request();
-	var query = 'select * from dbo.users';
-	request.query(query, function(err, recordset) {
-		if (err) console.log(err);
+// sql.connect(config, function(err) {
+// 	if (err) console.log(err);
+// 	var request = new sql.Request();
+// 	var query = 'select * from dbo.users';
+// 	request.query(query, function(err, recordset) {
+// 		if (err) console.log(err);
 		app.get('/users', function(req, res) {
 			res.send(recordset);
 		});
-	});
-});
+// 	});
+// });
 
 app.get('/assets/images/*', function(request, response){
 	var url =  request.url;
