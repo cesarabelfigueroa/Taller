@@ -338,25 +338,37 @@ var table = function (definition) {
 	 	}else{
 	 		var stringStament = "UPDATE "+ this.name+ " SET ";
 	 		var counter=0;
-	 		for(var tempfields in this.fields){
-	 			for(var temp in object) {
-	 				if((this.fields[tempfields].name == temp) && ((this.fields[tempfields].type) == typeof(object[temp]))){
-	 					if (counter == Object.keys(object).length-1) {
-	 						stringStament += temp + "='" + object[temp] + "'";
+	 		for(var temp in object) {
+	 			if(object.hasOwnProperty(temp)){
+	 				if(this.fields.hasOwnProperty(temp)){
+	 					var field= this.fields[temp];
+	 					if(!field.isAutoIncrement){
+	 						stringStament += temp + "=";
+	 						if (field.type !== "number") {
+		 						stringStament += "'" + object[temp] + "',";
+		 					} else {
+		 						if (!Number.isNaN(object[temp])) {
+		 							stringStament += object[temp] + ",";
+		 						} else {
+		 							throw "UPDATE -> Cannot update " + object[temp] + " in " + temp;
+		 						}	
+		 					}		
 	 					}else{
-	 						stringStament += temp + "='" + object[temp] + "', ";	
+	 						console.warn("The field " + temp + "is Auto Increment");
 	 					}
-	 					counter++;
 	 				}
-				}
+	 			}
+			}
+			if (stringStament.endsWith(",")) {
+	 			stringStament = stringStament.slice(0, stringStament.length - 1);
 	 		}
-			console.log(stringStament);
 	 		if (object.where && Object.keys(object.where).length > 0) {
-					stringStament += _parseWhere(object.where);
-				}else{
-					throw "WARNING";
-				}
-	 		console.log(stringStament);
+				stringStament += _parseWhere(object.where);
+			}else{
+				//throw "WARNING";
+			}
+	 		console.log("@UPDATE_STATEMENT = ", stringStament);
+	 		return stringStament;
 	 	}
 	 };
 	 
@@ -365,17 +377,14 @@ var table = function (definition) {
 	 	var stringStament = "";
 	 	if (!object) {
 	 		stringStament = "DELETE * FROM " + this.name+";";
-	 		console.log(stringStament);
 	 	}else{
 	 		stringStament += "DELETE FROM "+ this.name;
-	 		console.log(stringStament);
+	 		if(object.where && Object.keys(object.where).length >0){
+	 			stringStament += _parseWhere(object.where);
+	 		}
 	 	}
-	 	if(object.where && Object.keys(object.where).length >0){
-	 		stringStament += _parseWhere(object.where);
-	 		console.log(stringStament);
-	 	}else{
-	 		throw "Invalid condition";
-	 	}
+	 	console.log("@DELETE_STATEMENT = ", stringStament);
+	 	return stringStament;
 	 }
 
 
