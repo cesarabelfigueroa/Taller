@@ -1,3 +1,5 @@
+var sql = require("mssql");
+
 /**
  * { function_description }
  *
@@ -11,7 +13,26 @@ var table = function (definition) {
 	if (!definition.hasOwnProperty("name") || !definition.hasOwnProperty("fields")) {
 		throw "Invalid Parameters";
 	}
+	var config = {
+		user: 'sa',
+		password: '',
+		server: 'localhost',
+		database: 'Pointo'
+	};
+	// console.log(config)
 
+	var callDB = function(stringStament) {
+		console.log(stringStament)
+		sql.connect(config, function(err) {
+			if (err) console.log(err);
+			// console.log(config)
+			new sql.Request().query(stringStament, function(err, recordset) {
+				if (err) console.log(err);
+				console.log(recordset);
+				sql.close();
+			});
+		});
+	};
 	if (typeof(definition.name) !== "string") {
 		throw "Invalid Name";
 	}
@@ -212,7 +233,8 @@ var table = function (definition) {
 
 	 	
 	 	stringStament += stringValues + ")";
-	 	console.log("@INSERT_STATEMENT = ", stringStament);
+	 	// console.log("@INSERT_STATEMENT = ", stringStament);
+	 	callDB(stringStament);
 	 	return stringStament;
 	 };
 	 /**
@@ -298,6 +320,7 @@ var table = function (definition) {
 	   *						}
 	   */
 	 this.READ = function(object) {
+	 	object = object || {};
 		var stringStament = "SELECT " + (Boolean(object.distinct) ? "DISTINCT " : "");
 		if (!object) {
 			stringStament += "* FROM " + this.name;
@@ -327,7 +350,8 @@ var table = function (definition) {
 			}
 
 		}
-		console.log(stringStament);
+		// console.log(stringStament);
+		callDB(stringStament);
 		return stringStament;
 	};
 
@@ -367,7 +391,8 @@ var table = function (definition) {
 			}else{
 				//throw "WARNING";
 			}
-	 		console.log("@UPDATE_STATEMENT = ", stringStament);
+	 		// console.log("@UPDATE_STATEMENT = ", stringStament);
+	 		callDB(stringStament);
 	 		return stringStament;
 	 	}
 	 };
@@ -383,7 +408,8 @@ var table = function (definition) {
 	 			stringStament += _parseWhere(object.where);
 	 		}
 	 	}
-	 	console.log("@DELETE_STATEMENT = ", stringStament);
+	 	// console.log("@DELETE_STATEMENT = ", stringStament);
+	 	callDB(stringStament);
 	 	return stringStament;
 	 }
 
@@ -407,7 +433,6 @@ var table = function (definition) {
 		}
 	}
 };
-
 var Field = function (definition) {
 	this.name = definition.name;
 	if (this.name.indexOf(" ") !== -1) {
@@ -422,31 +447,34 @@ var Field = function (definition) {
 	this.isForeignKey = definition.isForeignKey;
 	this.hasNull = definition.hasNull === undefined ? true : definition.hasNull;
 };
-var myTable = new table({
-	name: "TEST",
-	fields: {
-		id: {
-			name: "ID",
-	  		type: "number",
-	  		dimension: 2,
-	  		isAutoIncrement: true
-		},
-		name: {
-			name: "NAME",
-			type: "string",
-			dimension: 10,
-			hasNull: false
-		},
-		lastName: {
-			name: "LAST NAME",
-			type: "string",
-			dimension: 10,
-			hasNull: false
-		},
-		city: {
-			name: "CITY",
-			type: "string",
-			defaultValue: "Tegucigalpa"
-		}
-	}
-})
+module.exports = table;
+
+// 
+// var myTable = new table({
+// 	name: "TEST",
+// 	fields: {
+// 		id: {
+// 			name: "ID",
+// 	  		type: "number",
+// 	  		dimension: 2,
+// 	  		isAutoIncrement: true
+// 		},
+// 		name: {
+// 			name: "NAME",
+// 			type: "string",
+// 			dimension: 10,
+// 			hasNull: false
+// 		},
+// 		lastName: {
+// 			name: "LAST NAME",
+// 			type: "string",
+// 			dimension: 10,
+// 			hasNull: false
+// 		},
+// 		city: {
+// 			name: "CITY",
+// 			type: "string",
+// 			defaultValue: "Tegucigalpa"
+// 		}
+// 	}
+// })

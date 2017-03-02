@@ -1,8 +1,10 @@
 var express = require('express');
+var http = require('http');
 var path = require('path');
 var bodyParser = require('body-parser');
 var sql = require("mssql");
 var fs = require('fs');
+var Table = require('./orm/table.js');
 
 var app = express();
 
@@ -17,24 +19,76 @@ app.use(bodyParser.urlencoded({
 
 
 
-// var config = {
-// 	user: 'sa',
-// 	password: '',
-// 	server: 'localhost',
-// 	database: 'Pointo'
-// };
+var config = {
+	user: 'sa',
+	password: '',
+	server: 'localhost',
+	database: 'Pointo'
+};
 
-// sql.connect(config, function(err) {
-// 	if (err) console.log(err);
-// 	var request = new sql.Request();
-// 	var query = 'select * from dbo.users';
-// 	request.query(query, function(err, recordset) {
-// 		if (err) console.log(err);
-		app.get('/users', function(req, res) {
-			res.send(recordset);
-		});
-// 	});
+// Just for test
+var myTable = new Table({
+	name: "USERS",
+	fields: {
+		id: {
+			name: "id_user",
+	  		type: "number",
+	  		dimension: 2,
+	  		isAutoIncrement: true
+		},
+		name: {
+			name: "name",
+			type: "string",
+			dimension: 10,
+			hasNull: false
+		},
+		userName: {
+			name: "username",
+			type: "string",
+			dimension: 10,
+			hasNull: false
+		},
+		password: {
+			name: "password",
+			type: "string",
+			dimension: 10,
+			hasNull: false
+		},
+		email: {
+			name: "email",
+			type: "string",
+			defaultValue: "Tegucigalpa"
+		},
+		disabled: {
+			name: "disabled",
+			type: "number",
+			defaultValue: 0
+		}
+	}
+});
+// myTable.CREATE2({
+// 	name: "Cesar",
+// 	userName: "cesar",
+// 	password: "12345",
+// 	email: "cesads@hola.com"
 // });
+myTable.READ({
+	fields: ["id", "userName"]
+});
+
+
+// app.sql = sql.connect(config, function(err) {
+// 	if (err) console.log(err);
+	// var request = new sql.Request();
+	// var query = 'select * from dbo.users';
+	// request.query(query, function(err, recordset) {
+	// 	if (err) console.log(err);
+	// 	app.get('/users', function(req, res) {
+	// 		res.send(recordset);
+	// 	});
+	// });
+// });
+
 
 app.get('/assets/images/*', function(request, response){
 	var url =  request.url;
