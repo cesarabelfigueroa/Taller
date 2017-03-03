@@ -49,21 +49,22 @@ var table = function (definition) {
 	/**
 	 * { Obtener la sentenceia WHERE }
 	 *
-	 * @param      {<Array>}  whereOptions: [{
-	   *								field_name: value,
-	   *								$and: [{
-	   *									field_name: value,
-	   *									field_name: value,
-	   *									$or: [{
-	   *										field_name: value,
-	   *										field_name: value,
-	   *									}]
-	   *								}],
-	   *								$or: [{
-	   *									field_name: value,
-	   *									field_name: value
-	   *								}]
-	   *							}]
+	 * @param      {<Array>}  
+	 * 		whereOptions: [{
+     *			field_name: value,
+     *			$and: [{
+     *				field_name: value,
+     *				field_name: value,
+     *				$or: [{
+     *					field_name: value,
+     *					field_name: value,
+     *				}]
+     *			}],
+     *			$or: [{
+     *				field_name: value,
+     *				field_name: value
+     *			}]
+     *		}]
 	 * @return     {string}  { String con la sentencia WHERE para query SQL }
 	 */
 	var _parseWhere = function(whereOptions) {
@@ -178,6 +179,15 @@ var table = function (definition) {
 	 	return stringFields;
 	};
 
+	/**
+	 *
+	 * @param      {JSON}  	object  		JSON tipo key value, donde el key es nombre del campo y value será el valor. 
+	 *										En caso de que el JSON no tengo un campo de la tabla lo colocará nulo o buscará si el campo tiene valor por defecto
+	 *										y en el caso que el campo sea obligatorio no se realizará la insercción. 
+	 *										El valor a insertar deberá coincidir con el tipo del campo.
+	 * 
+	 * @return     {string}	stringStament 	Statement para la insercción
+	 */
 	 this.CREATE2 = function(object) {
 	 	var stringStament = "INSERT INTO " + this.name + " (";
 	 	var stringValues = ") VALUES(";
@@ -298,26 +308,27 @@ var table = function (definition) {
 	  /**
 	   * Ejecutar select
 	   *
-	   * @param      {<JSON>}  object (opcional) :{
-	   *							fields(optional): [field_name, field_name2], // Si no tiene la propiedad o es un arreglo vacio trae todos los campos
-	   *							where(optional): [{
+	   * @param      {<JSON>}  object (opcional) 
+	   *			{
+	   *				fields(optional): [field_name, field_name2], // Si no tiene la propiedad o es un arreglo vacio trae todos los campos
+	   *				where(optional): [{
+	   *					field_name: value,
+	   *					$and: [{
+	   *							field_name: value,
+	   *							field_name: value,
+	   *						$	or: [{
 	   *								field_name: value,
-	   *								$and: [{
-	   *									field_name: value,
-	   *									field_name: value,
-	   *									$or: [{
-	   *										field_name: value,
-	   *										field_name: value,
-	   *									}]
-	   *								}],
-	   *								$or: [{
-	   *									field_name: value,
-	   *									field_name: value
-	   *								}]
-	   *							}],
-	   *							orderBy(optional): [-field_name, +field_name2, field_name3], // El guion es equivalente a DESC y el signo mas o sólo el nombre del campo es igual que ASC
-	   *							groupBY(optional): [field_name, field_name2]
-	   *						}
+	   *								field_name: value,
+	   *							}]
+	   *					}],
+	   *					$or: [{
+	   *						field_name: value,
+	   *						field_name: value
+	   *					}]
+	   *				}],
+	   *				orderBy(optional): [-field_name, +field_name2, field_name3], // El guion es equivalente a DESC y el signo mas o sólo el nombre del campo es igual que ASC
+	   *				groupBY(optional): [field_name, field_name2]
+	   *			}
 	   */
 	 this.READ = function(object) {
 	 	object = object || {};
@@ -356,6 +367,16 @@ var table = function (definition) {
 	};
 
 
+	/**
+	 *
+	 * @param      {JSON}  	object  		El json puede llevar una propiedad para el where en caso de no tenerla hará el where de acuerdo al id
+	 * 										JSON tipo key value, donde el key es nombre del campo y value será el valor. 
+	 *										En caso de que el JSON no tengo un campo de la tabla lo colocará nulo o buscará si el campo tiene valor por defecto
+	 *										y en el caso que el campo sea obligatorio no se realizará la insercción. 
+	 *										El valor a insertar deberá coincidir con el tipo del campo.
+	 * 
+	 * @return     {string}	stringStament 	Statement para la insercción
+	 */
 	 this.UPDATE =function(object){
 	 	if(!object){
 	 		throw "Invalid  Parameters";
@@ -363,11 +384,11 @@ var table = function (definition) {
 	 		var stringStament = "UPDATE "+ this.name+ " SET ";
 	 		var counter=0;
 	 		for(var temp in object) {
-	 			if(object.hasOwnProperty(temp)){
+	 			if(object.hasOwnProperty(temp) && temp !== "id"){
 	 				if(this.fields.hasOwnProperty(temp)){
 	 					var field= this.fields[temp];
 	 					if(!field.isAutoIncrement){
-	 						stringStament += temp + "=";
+	 						stringStament += field.name + "=";
 	 						if (field.type !== "number") {
 		 						stringStament += "'" + object[temp] + "',";
 		 					} else {
@@ -378,7 +399,7 @@ var table = function (definition) {
 		 						}	
 		 					}		
 	 					}else{
-	 						console.warn("The field " + temp + "is Auto Increment");
+	 						console.warn("The field " + field.name + "is Auto Increment");
 	 					}
 	 				}
 	 			}
@@ -388,8 +409,8 @@ var table = function (definition) {
 	 		}
 	 		if (object.where && Object.keys(object.where).length > 0) {
 				stringStament += _parseWhere(object.where);
-			}else{
-				//throw "WARNING";
+			} else if (object.fields.hasOwnProperty("id")) {
+				stringStament += " WHERE ID = " + this.fields.id.name;
 			}
 	 		// console.log("@UPDATE_STATEMENT = ", stringStament);
 	 		callDB(stringStament);
@@ -397,15 +418,23 @@ var table = function (definition) {
 	 	}
 	 };
 	 
-
+	 /**
+	  * { function_description }
+	  *
+	  * @param      {JSON}	object  El objeto puedo contener la propiedad o where o simplemente el id
+	  */
 	 this.DELETE =function(object){
 	 	var stringStament = "";
 	 	if (!object) {
 	 		stringStament = "DELETE * FROM " + this.name+";";
-	 	}else{
+	 	} else {
 	 		stringStament += "DELETE FROM "+ this.name;
-	 		if(object.where && Object.keys(object.where).length >0){
+	 		if (object.where && Object.keys(object.where).length >0){
 	 			stringStament += _parseWhere(object.where);
+	 		} else if (object.hasOwnProperty("id")) {
+				stringStament += " WHERE ID = " object.id;
+	 		} else {
+	 			throw "Cannot delete all the data";
 	 		}
 	 	}
 	 	// console.log("@DELETE_STATEMENT = ", stringStament);
@@ -448,33 +477,3 @@ var Field = function (definition) {
 	this.hasNull = definition.hasNull === undefined ? true : definition.hasNull;
 };
 module.exports = table;
-
-// 
-// var myTable = new table({
-// 	name: "TEST",
-// 	fields: {
-// 		id: {
-// 			name: "ID",
-// 	  		type: "number",
-// 	  		dimension: 2,
-// 	  		isAutoIncrement: true
-// 		},
-// 		name: {
-// 			name: "NAME",
-// 			type: "string",
-// 			dimension: 10,
-// 			hasNull: false
-// 		},
-// 		lastName: {
-// 			name: "LAST NAME",
-// 			type: "string",
-// 			dimension: 10,
-// 			hasNull: false
-// 		},
-// 		city: {
-// 			name: "CITY",
-// 			type: "string",
-// 			defaultValue: "Tegucigalpa"
-// 		}
-// 	}
-// })
