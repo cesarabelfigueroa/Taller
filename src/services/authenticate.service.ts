@@ -13,4 +13,8 @@ export class AuthenticateService {
 	getUsers(): Observable<any> {
 		return this.http.get('/users').map(res => res.json());
 	}
+
+	getTable(): Observable<any> {
+		return this.http.get('/table').map(res => res.json());
+	}
 }
