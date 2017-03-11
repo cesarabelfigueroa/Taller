@@ -9,16 +9,16 @@ var sql = require("mssql");
  * 	fields: Array<field>
  * }
  */
-var table = function (definition) {
-	if (!definition.hasOwnProperty("name") || !definition.hasOwnProperty("fields")) {
-		throw "Invalid Parameters";
-	}
-	var config = {
-		user: 'sa',
-		password: '',
-		server: 'localhost',
-		database: 'Pointo'
-	};
+ var table = function (definition) {
+ 	if (!definition.hasOwnProperty("name") || !definition.hasOwnProperty("fields")) {
+ 		throw "Invalid Parameters";
+ 	}
+ 	var config = {
+ 		user: 'sa',
+ 		password: '',
+ 		server: 'localhost',
+ 		database: 'Pointo'
+ 	};
 	// console.log(config)
 
 	var callDB = function(stringStament) {
@@ -67,77 +67,81 @@ var table = function (definition) {
      *		}]
 	 * @return     {string}  { String con la sentencia WHERE para query SQL }
 	 */
-	var _parseWhere = function(whereOptions) {
-		return " WHERE " + _parseCondition(whereOptions);
-	};
+	 var _parseWhere = function(whereOptions, righTable) {
+	 	return " WHERE " + _parseCondition(whereOptions, righTable);
+	 };
 
 
-	var _parseCondition = function(whereOptions) {
-		var _stringWhere = "";
-		var _cont = 0;
-		for (var CONDITION in whereOptions) {
-			if (whereOptions.hasOwnProperty(CONDITION)) {
-				var _operator = "=";
-				var _value = null;
-				if (CONDITION === "$and" || CONDITION === "$or") {
-					var ands = whereOptions[CONDITION];
-					_stringWhere += "("
-					for (var k = 0; k < ands.length; k++) {
-						_stringWhere += _parseCondition(ands[k]);
+	 var _parseCondition = function(whereOptions, rightTable) {
+	 	var _stringWhere = "";
+	 	var _cont = 0;
+	 	for (var CONDITION in whereOptions) {
+	 		if (whereOptions.hasOwnProperty(CONDITION)) {
+	 			var _operator = "=";
+	 			var _value = null;
+	 			if (CONDITION === "$and" || CONDITION === "$or") {
+	 				var ands = whereOptions[CONDITION];
+	 				_stringWhere += "("
+	 				for (var k = 0; k < ands.length; k++) {
+	 					_stringWhere += _parseCondition(ands[k]);
 
-						if (k < ands.length - 1) {
-							_stringWhere += (CONDITION === "$and" ? " AND " : " OR ");
-						}
-					}
-					_stringWhere += ")";
-				} else {
-					var _condition = whereOptions[CONDITION];
-					if (_self.fields.hasOwnProperty(CONDITION)) {
-						var _field = _self.fields[CONDITION];
+	 					if (k < ands.length - 1) {
+	 						_stringWhere += (CONDITION === "$and" ? " AND " : " OR ");
+	 					}
+	 				}
+	 				_stringWhere += ")";
+	 			} else {
+	 				var _condition = whereOptions[CONDITION];
+	 				if (_self.fields.hasOwnProperty(CONDITION)) {
+	 					var _field = _self.fields[CONDITION];
 
-						if (typeof(_condition) === "object" && !Array.isArray(_condition)) {
-							var oper = Object.keys(_condition)[0];
-							_operator = operators[oper];
-							_value  = _condition[oper];
-						} else { 
-							_value = _condition;
-						}
-						
-						if (Array.isArray(_value)) {
-							if (_operator === "=" || _operator === "!=") {
-								if (_operator === "=") {
-									_operator = " IN "
-								} else if (_operator === "not") {
-									_operator = " NOT IN ";
-								}
-								_value = "('" + _value.join("','") + "')";
-							} else {
-								_stringWhere += "(";
-								_stringWhere += _field.name + _operator + " OR " + _value.join(" " + _field.name + " OR" + _operator) + ")";
-								continue;
-							}
-						}
+	 					if (typeof(_condition) === "object" && !Array.isArray(_condition)) {
+	 						var oper = Object.keys(_condition)[0];
+	 						if (oper === "on") {
+	 							_value = rightTable.name + '.' + rightTable.fields[_condition[oper]].name;
+	 						} else {
+	 							_operator = operators[oper];
+	 							_value  = _condition[oper];
+	 						}
+	 					} else { 
+	 						_value = _condition;
+	 					}
 
-						if (_field.type === "number" && Number.isNaN(_value)) {
-							throw "Can't compare types";
-						}
+	 					if (Array.isArray(_value)) {
+	 						if (_operator === "=" || _operator === "!=") {
+	 							if (_operator === "=") {
+	 								_operator = " IN "
+	 							} else if (_operator === "not") {
+	 								_operator = " NOT IN ";
+	 							}
+	 							_value = "('" + _value.join("','") + "')";
+	 						} else {
+	 							_stringWhere += "(";
+	 							_stringWhere += _field.name + _operator + " OR " + _value.join(" " + _field.name + " OR" + _operator) + ")";
+	 							continue;
+	 						}
+	 					}
 
-						if (_field.type === "string" && _operator !== " IN " && _operator !== " NOT IN ") {
-							_value = "'" + _value + "'";
-						}
+	 					if (_field.type === "number" && Number.isNaN(_value)) {
+	 						throw "Can't compare types";
+	 					}
 
-						_stringWhere += _field.name + _operator + _value;
-						
-					} else {
-						throw "The table doesn't have the field";
-					}
-				}
-				if (_cont < Object.keys(whereOptions).length - 1) {
-					_stringWhere += " AND ";
-				}
-			}
-			_cont++;
-		}
+	 					if (_field.type === "string" && _operator !== " IN " && _operator !== " NOT IN ") {
+	 						_value = "'" + _value + "'";
+	 					}
+
+	 					_stringWhere += _field.name + _operator + _value;
+
+	 				} else {
+	 					throw "The table doesn't have the field: " + CONDITION;
+	 				}
+	 			}
+	 			if (_cont < Object.keys(whereOptions).length - 1) {
+	 				_stringWhere += " AND ";
+	 			}
+	 		}
+	 		_cont++;
+	 	}
 		// console.log(_stringWhere)
 		return _stringWhere;
 	};
@@ -153,31 +157,31 @@ var table = function (definition) {
 	 * @return     {<string>}   		stringFields	Cadena de texto con los nombres de las columnas separados por comas.
 	 * 													Ejemplo: "[FIELD NAME], [FIELD NAME2]"
 	 */
-	var getStringFields = function(fields, isOrderBy) {
-		var stringFields = "";
-		if (!Array.isArray(fields)) {
-			fields = Object.keys(fields);
-		}
+	 var getStringFields = function(fields, isOrderBy) {
+	 	var stringFields = "";
+	 	if (!Array.isArray(fields)) {
+	 		fields = Object.keys(fields);
+	 	}
 
-		for (var i = 0; i < fields.length; i++) {
-			var _orderBy = "";
-			if (isOrderBy) {
-				_orderBy = fields[i].startsWith("-") ? "DESC" : "ASC";
+	 	for (var i = 0; i < fields.length; i++) {
+	 		var _orderBy = "";
+	 		if (isOrderBy) {
+	 			_orderBy = fields[i].startsWith("-") ? "DESC" : "ASC";
 
-				if (fields[i].startsWith("-") || fields[i].startsWith("+")) {
-					fields[i] = fields[i].slice(1, fields[i].length);
-					console.log("@fields[i]", fields[i])
-				}					
-			}
-			if (_self.fields.hasOwnProperty(fields[i])) {
-				stringFields += _self.fields[fields[i]].name + (isOrderBy ? (" " + _orderBy) : "") + ",";
-			}
-		}
-		if (stringFields.endsWith(",")) {
+	 			if (fields[i].startsWith("-") || fields[i].startsWith("+")) {
+	 				fields[i] = fields[i].slice(1, fields[i].length);
+	 				console.log("@fields[i]", fields[i])
+	 			}					
+	 		}
+	 		if (_self.fields.hasOwnProperty(fields[i])) {
+	 			stringFields += _self.fields[fields[i]].name + (isOrderBy ? (" " + _orderBy) : "") + ",";
+	 		}
+	 	}
+	 	if (stringFields.endsWith(",")) {
 	 		stringFields = stringFields.slice(0, stringFields.length - 1);
 	 	}
 	 	return stringFields;
-	};
+	 };
 
 	/**
 	 *
@@ -187,6 +191,38 @@ var table = function (definition) {
 	 *										El valor a insertar deberá coincidir con el tipo del campo.
 	 * 
 	 * @return     {string}	stringStament 	Statement para la insercción
+	 * 
+	 * RESTAURANTES.CREATE2({
+	 * 	nombre: "Matambritas",
+	 * 	$otherTables: [{
+	 * 		table: "Local",
+	 * 		values: [{
+	 * 			idRestaurante: {
+	 * 				from: RESTAURANTES.fields.id
+	 * 			},
+ 	 *			address: "sdaasd",
+ 	 * 			phone: "asdad"
+	 * 		}]		
+	 * 	},{
+	 * 		table: "CATEGORIAS",
+	 * 		values: [{
+	 *	 		idCategoria: 1,
+	 * 			idRestaurante: {
+	 * 				from: RESTAURANTES.fields.id
+	 * 			}
+	 * 		}]
+	 * 	}]
+	 * })
+	 * 
+	 * $tblsIntermedias: [{
+	 * 	table: tabla1,
+	 * 	values: [{
+	 * 		field1: value,
+	 * 		field2: {
+	 * 			from: tabla1.field 
+	 * 		}
+	 * 	}]
+	 * }]
 	 */
 	 this.CREATE2 = function(object) {
 	 	var stringStament = "INSERT INTO " + this.name + " (";
@@ -207,28 +243,30 @@ var table = function (definition) {
 	 		}
 	 	}
 
+
+
 	 	for (var fieldName in object) {
 	 		if (object.hasOwnProperty(fieldName)) {
-		 		if (this.fields.hasOwnProperty(fieldName)) {
-		 			var field = this.fields[fieldName];
-		 			if (!field.isAutoIncrement) {
-			 			stringStament += field.name + ",";
+	 			if (this.fields.hasOwnProperty(fieldName)) {
+	 				var field = this.fields[fieldName];
+	 				if (!field.isAutoIncrement) {
+	 					stringStament += field.name + ",";
 
-			 			if (field.type !== "number") {
-			 				stringValues += "'" + object[fieldName] + "',";
-			 			} else {
-			 				if (!Number.isNaN(object[fieldName])) {
-			 					stringValues += object[fieldName] + ",";
-			 				} else {
-			 					throw "CREATE -> Cannot insert " + object[fieldName] + " in " + fieldName;
-			 				}
-			 			}
-		 			} else {
-						console.warn("The field " + fieldName + " is Auto Increment");
-		 			}
-		 		} else {
-		 			console.warn("The table doesn't have the field: " + fieldName);
-		 		}
+	 					if (field.type !== "number") {
+	 						stringValues += "'" + object[fieldName] + "',";
+	 					} else {
+	 						if (!Number.isNaN(object[fieldName])) {
+	 							stringValues += object[fieldName] + ",";
+	 						} else {
+	 							throw "CREATE -> Cannot insert " + object[fieldName] + " in " + fieldName;
+	 						}
+	 					}
+	 				} else {
+	 					console.warn("The field " + fieldName + " is Auto Increment");
+	 				}
+	 			} else {
+	 				console.warn("The table doesn't have the field: " + fieldName);
+	 			}
 	 		}
 	 	}
 
@@ -241,7 +279,7 @@ var table = function (definition) {
 	 		stringValues = stringValues.slice(0, stringValues.length - 1);
 	 	}
 
-	 	
+	 	console.log(stringValues)
 	 	stringStament += stringValues + ")";
 	 	// console.log("@INSERT_STATEMENT = ", stringStament);
 	 	callDB(stringStament);
@@ -276,9 +314,9 @@ var table = function (definition) {
 	 				}else{
 	 				}
 	 			}
-				if(checker == 0){
-					throw "Invalid Field";
- 				}
+	 			if(checker == 0){
+	 				throw "Invalid Field";
+	 			}
 	 		}
 	 		stringStament += ") VALUES (";
 	 		counter=0;
@@ -311,12 +349,21 @@ var table = function (definition) {
 	   * @param      {<JSON>}  object (opcional) 
 	   *			{
 	   *				fields(optional): [field_name, field_name2], // Si no tiene la propiedad o es un arreglo vacio trae todos los campos
+	   *				join: [{
+	   *					table: objectTable,
+	   *					outer: "LEFT" / "JOIN",
+	   *					on: [{
+	   *						field1: {
+	   *							on: field2
+	   *						}
+	   *					}]
+	   *				}]
 	   *				where(optional): [{
 	   *					field_name: value,
 	   *					$and: [{
 	   *							field_name: value,
 	   *							field_name: value,
-	   *						$	or: [{
+	   *							$or: [{
 	   *								field_name: value,
 	   *								field_name: value,
 	   *							}]
@@ -330,37 +377,53 @@ var table = function (definition) {
 	   *				groupBY(optional): [field_name, field_name2]
 	   *			}
 	   */
-	 this.READ = function(object) {
-	 	object = object || {};
-		var stringStament = "SELECT " + (Boolean(object.distinct) ? "DISTINCT " : "");
-		if (!object) {
-			stringStament += "* FROM " + this.name;
-			console.log(stringStament);
-		} else {
-			if (!object.fields) {
-				stringStament += "*";
-			} else {
-				if (object.fields.length > 0) {
-					stringStament += getStringFields(object.fields);
-			 	} else {
-			 		stringStament += "*"
-			 	}
-			}
-			stringStament += " FROM " + this.name;
+	   this.READ = function(object) {
+	   	object = object || {};
+	   	var stringStament = "SELECT " + (Boolean(object.distinct) ? "DISTINCT " : "");
+	   	if (!object) {
+	   		stringStament += "* FROM " + this.name;
+	   		console.log(stringStament);
+	   	} else {
+	   		if (!object.fields) {
+	   			stringStament += "*";
+	   		} else {
+	   			if (object.fields.length > 0) {
+	   				stringStament += getStringFields(object.fields);
+	   			} else {
+	   				stringStament += "*"
+	   			}
+	   		}
+	   		stringStament += " FROM " + this.name;
 
-			if (object.where && Object.keys(object.where).length > 0) {
-				stringStament += _parseWhere(object.where);
-			}
+	   		var stringJoin = "";
+	   		if (object.join) {
+	   			for (var JOIN = 0; JOIN < object.join.length; JOIN++) {
+	   				var _join = object.join[JOIN];
+	   				var _outer = "INNER";
 
-			if (object.groupBy) {
-				stringStament += " GROUP BY " + getStringFields(object.groupBy);
-			}
+	   				if (_join.hasOwnProperty("outer")) {
+	   					_outer = _join.outer;
+	   				}
 
-			if (object.orderBy) {
-				stringStament += " ORDER BY " + getStringFields(object.orderBy, true);
-			}
+	   				stringJoin += _outer + " JOIN " + _join.table.name;
+	   				stringJoin += " ON " + _parseCondition(_join.on, _join.table);
+	   			}
+	   		}
+	   		stringStament += stringJoin;
 
-		}
+	   		if (object.where && Object.keys(object.where).length > 0) {
+	   			stringStament += _parseWhere(object.where);
+	   		}
+
+	   		if (object.groupBy) {
+	   			stringStament += " GROUP BY " + getStringFields(object.groupBy);
+	   		}
+
+	   		if (object.orderBy) {
+	   			stringStament += " ORDER BY " + getStringFields(object.orderBy, true);
+	   		}
+
+	   	}
 		// console.log(stringStament);
 		callDB(stringStament);
 		return stringStament;
@@ -390,28 +453,28 @@ var table = function (definition) {
 	 					if(!field.isAutoIncrement){
 	 						stringStament += field.name + "=";
 	 						if (field.type !== "number") {
-		 						stringStament += "'" + object[temp] + "',";
-		 					} else {
-		 						if (!Number.isNaN(object[temp])) {
-		 							stringStament += object[temp] + ",";
-		 						} else {
-		 							throw "UPDATE -> Cannot update " + object[temp] + " in " + temp;
-		 						}	
-		 					}		
+	 							stringStament += "'" + object[temp] + "',";
+	 						} else {
+	 							if (!Number.isNaN(object[temp])) {
+	 								stringStament += object[temp] + ",";
+	 							} else {
+	 								throw "UPDATE -> Cannot update " + object[temp] + " in " + temp;
+	 							}	
+	 						}		
 	 					}else{
 	 						console.warn("The field " + field.name + "is Auto Increment");
 	 					}
 	 				}
 	 			}
-			}
-			if (stringStament.endsWith(",")) {
+	 		}
+	 		if (stringStament.endsWith(",")) {
 	 			stringStament = stringStament.slice(0, stringStament.length - 1);
 	 		}
 	 		if (object.where && Object.keys(object.where).length > 0) {
-				stringStament += _parseWhere(object.where);
-			} else if (object.fields.hasOwnProperty("id")) {
-				stringStament += " WHERE ID = " + this.fields.id.name;
-			}
+	 			stringStament += _parseWhere(object.where);
+	 		} else if (object.fields.hasOwnProperty("id")) {
+	 			stringStament += " WHERE ID = " + this.fields.id.name;
+	 		}
 	 		// console.log("@UPDATE_STATEMENT = ", stringStament);
 	 		callDB(stringStament);
 	 		return stringStament;
@@ -423,20 +486,20 @@ var table = function (definition) {
 	  *
 	  * @param      {JSON}	object  El objeto puedo contener la propiedad o where o simplemente el id
 	  */
-	 this.DELETE =function(object){
-	 	var stringStament = "";
-	 	if (!object) {
-	 		stringStament = "DELETE * FROM " + this.name+";";
-	 	} else {
-	 		stringStament += "DELETE FROM "+ this.name;
-	 		if (object.where && Object.keys(object.where).length >0){
-	 			stringStament += _parseWhere(object.where);
-	 		} else if (object.hasOwnProperty("id")) {
-				stringStament += " WHERE ID = " object.id;
-	 		} else {
-	 			throw "Cannot delete all the data";
-	 		}
-	 	}
+	  this.DELETE =function(object){
+	  	var stringStament = "";
+	  	if (!object) {
+	  		stringStament = "DELETE * FROM " + this.name+";";
+	  	} else {
+	  		stringStament += "DELETE FROM "+ this.name;
+	  		if (object.where && Object.keys(object.where).length >0){
+	  			stringStament += _parseWhere(object.where);
+	  		} else if (object.hasOwnProperty("id")) {
+	  			stringStament += " WHERE ID = " + object.id;
+	  		} else {
+	  			throw "Cannot delete all the data";
+	  		}
+	  	}
 	 	// console.log("@DELETE_STATEMENT = ", stringStament);
 	 	callDB(stringStament);
 	 	return stringStament;
@@ -454,7 +517,7 @@ var table = function (definition) {
 	for (var KEY in definition.fields) {
 		if (definition.fields.hasOwnProperty(KEY)) {
 			if (DBNames.indexOf(definition.fields[KEY].name) === -1) {
-				this.fields[KEY] = new Field(definition.fields[KEY]);
+				this.fields[KEY] = new Field(definition.fields[KEY], this);
 				DBNames.push(this.fields[KEY].name);
 			} else {
 				console.error("Duplicity fields");
@@ -462,8 +525,8 @@ var table = function (definition) {
 		}
 	}
 };
-var Field = function (definition) {
-	this.name = definition.name;
+var Field = function (definition, table) {
+	this.name = table.name + "." + definition.name;
 	if (this.name.indexOf(" ") !== -1) {
 		this.name = "[" + this.name + "]";
 	}
@@ -477,3 +540,58 @@ var Field = function (definition) {
 	this.hasNull = definition.hasNull === undefined ? true : definition.hasNull;
 };
 module.exports = table;
+// var myTable = new table({
+// 	name: "USERS",
+// 	fields: {
+// 		id: {
+// 			name: "id_user",
+// 	  		type: "number",
+// 	  		dimension: 2,
+// 	  		isAutoIncrement: true
+// 		},
+// 		name: {
+// 			name: "name",
+// 			type: "string",
+// 			dimension: 10,
+// 			hasNull: false
+// 		},
+// 		userName: {
+// 			name: "username",
+// 			type: "string",
+// 			dimension: 10,
+// 			hasNull: false
+// 		},
+// 		password: {
+// 			name: "password",
+// 			type: "string",
+// 			dimension: 10,
+// 			hasNull: false
+// 		},
+// 		email: {
+// 			name: "email",
+// 			type: "string",
+// 			defaultValue: "Tegucigalpa"
+// 		},
+// 		disabled: {
+// 			name: "disabled",
+// 			type: "number",
+// 			defaultValue: 0
+// 		}
+// 	}
+// });
+// var myHobbies = new table({
+// 	name: "HOBBIES",
+// 	fields: {
+// 		idUser: {
+// 			name: "id_user",
+// 	  		type: "number",
+// 	  		dimension: 2,
+// 	  		isAutoIncrement: true
+// 		},
+// 		hobby: {
+// 			name: "Hobby",
+// 			type: "string",
+// 			dimension: 10
+// 		}
+// 	}
+// });
