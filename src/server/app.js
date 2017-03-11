@@ -66,7 +66,6 @@ var myTable = new table({
 		}
 	}
 });
-=======
 // var myTable = new Table({
 // 	name: "USERS",
 // 	fields: {
@@ -172,9 +171,6 @@ module.exports = app;
 
 // Create the Service
 
-app.service('nameService', Function()){
-    
-});
 
  myTable.CREATE([{
  	name: "Cesar",
