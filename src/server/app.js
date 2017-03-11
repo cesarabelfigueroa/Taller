@@ -27,7 +27,7 @@ var config = {
 };
 
 // Just for test
-var myTable = new Table({
+var myTable = new table({
 	name: "USERS",
 	fields: {
 		id: {
@@ -110,3 +110,22 @@ app.listen(app.get('port'), function() {
 
 
 module.exports = app;
+
+
+// Create the Service
+
+app.service('nameService', Function()){
+    
+});
+
+ myTable.CREATE([{
+ 	name: "Cesar",
+ 	userName: "cesar",
+ 	password: "12345",
+ 	email: "cesads@hola.com"
+},{
+ 	name: "Cesar",
+ 	userName: "cesar",
+ 	password: "12345",
+ 	email: "cesads@hola.com"
+}]);

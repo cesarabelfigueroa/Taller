@@ -1,4 +1,4 @@
-var sql = require("mssql");
+//var sql = require("mssql");
 
 /**
  * { function_description }
@@ -188,50 +188,83 @@ var table = function (definition) {
 	 * 
 	 * @return     {string}	stringStament 	Statement para la insercción
 	 */
-	 this.CREATE2 = function(object) {
-	 	var stringStament = "INSERT INTO " + this.name + " (";
-	 	var stringValues = ") VALUES(";
-
+     /**  RESTAURANTES.CREATE2({
+     *  nombre: "Matambritas",
+     *  $tblsIntermedias: [{
+     *   table: "CATEGORIAS",
+     *   values: [{
+     *    idCategoria: 1,
+     *    idRestaurante: {
+     *     from: RESTAURANTES.fields.id
+     *    }
+     *   }]
+     *  }]
+     * })
+     * 
+     * $tblsIntermedias: [{
+     *  table: tabla1,
+     *  values: [{
+     *   field1: value,
+     *   field2: {
+     *    from: tabla1.field 
+     *   }
+     *  }]
+     * }]
+     */
+	 this.CREATE = function(object) {
+	var stringStament = "INSERT INTO " + this.name + " (";
+	var stringValues = ") VALUES ";
+	if (!Array.isArray(object)) {
+		object = [object];
+	}    
 	 	// Buscar los campos que no trae el objeto y obtener el valor por defecto o validar si el valor puede ser nulo
 	 	for (var KEY in this.fields) {
 	 		if (this.fields.hasOwnProperty(KEY)) {
 	 			var field = this.fields[KEY];
-	 			if (!object.hasOwnProperty(KEY)) {
+                for(var i = 0; i < object.length; i++){ 
+                    if (!object[i].hasOwnProperty(KEY)) {
 
-	 				if (field.defaultValue !== undefined) {
-	 					object[KEY] = field.defaultValue;
-	 				} else if (!field.hasNull) {
-	 					throw "CREATE -> The field " + field.name + " cannot be null";
+                        if (field.defaultValue !== undefined) {
+                            object[i][KEY] = field.defaultValue;
+                        } else if (!field.hasNull) {
+                            throw "CREATE -> The field " + field.name + " cannot be null";
+                        }
+                    }
+                }
+	 		}
+	 	}
+	 	for(var i = 0; i < object.length; i++){ 
+            stringValues += "(";
+	 		for (var fieldName in object[i]) {
+	 			if (object[i].hasOwnProperty(fieldName)) {
+	 				if (this.fields.hasOwnProperty(fieldName)) {
+	 					var field = this.fields[fieldName];
+	 					if (!field.isAutoIncrement) {
+	 						if(i==0){
+	 							stringStament += field.name + ",";
+                            }
+	 						if (field.type !== "number") {
+	 							stringValues += "'" + object[i][fieldName] + "',";
+	 						} else {
+	 							if (!Number.isNaN(object[i][fieldName])) {
+	 								stringValues += object[i][fieldName] + ",";
+	 							} else {
+	 								throw "CREATE -> Cannot insert " + object[i][fieldName] + " in " + fieldName;
+	 							}
+	 						}
+	 					} else {
+	 						console.warn("The field " + fieldName + " is Auto Increment");
+	 					}
+	 				} else {
+	 					console.warn("The table doesn't have the field: " + fieldName);
 	 				}
 	 			}
 	 		}
+            if (stringValues.endsWith(",")) {
+	 		    stringValues = stringValues.slice(0, stringValues.length - 1);
+            }
+            stringValues += "),"
 	 	}
-
-	 	for (var fieldName in object) {
-	 		if (object.hasOwnProperty(fieldName)) {
-		 		if (this.fields.hasOwnProperty(fieldName)) {
-		 			var field = this.fields[fieldName];
-		 			if (!field.isAutoIncrement) {
-			 			stringStament += field.name + ",";
-
-			 			if (field.type !== "number") {
-			 				stringValues += "'" + object[fieldName] + "',";
-			 			} else {
-			 				if (!Number.isNaN(object[fieldName])) {
-			 					stringValues += object[fieldName] + ",";
-			 				} else {
-			 					throw "CREATE -> Cannot insert " + object[fieldName] + " in " + fieldName;
-			 				}
-			 			}
-		 			} else {
-						console.warn("The field " + fieldName + " is Auto Increment");
-		 			}
-		 		} else {
-		 			console.warn("The table doesn't have the field: " + fieldName);
-		 		}
-	 		}
-	 	}
-
 	 	// Fix con la coma final
 	 	if (stringStament.endsWith(",")) {
 	 		stringStament = stringStament.slice(0, stringStament.length - 1);
@@ -242,69 +275,12 @@ var table = function (definition) {
 	 	}
 
 	 	
-	 	stringStament += stringValues + ")";
+	 	stringStament += stringValues;
 	 	// console.log("@INSERT_STATEMENT = ", stringStament);
 	 	callDB(stringStament);
 	 	return stringStament;
 	 };
-	 /**
-	 *	myTable.CREATE({
- 	 * 	id:2,
- 	 *	nombre:"Herbert",
- 	 *	apellido:"Paz"
-	 *	})	
-	 *  Este metodo valida tanto el nombre y tipo de cada campo 
-	 */
-	 this.CREATE = function(object){
-	 	var stringStament = "INSERT INTO ";
-	 	if (!object) {
-	 		throw "Invalid Parameters";
-	 	}else{
-	 		var counter = 0;
-	 		stringStament += this.name+ " (";
-	 		for(var tempfields in this.fields){	
-	 			var checker = 0;
-	 			for(var fieldName in object) {
-	 				if(this.fields[tempfields].name == fieldName){
-	 					if (counter == Object.keys(object).length-1) {
-	 						stringStament += fieldName;
-	 					}else{
-	 						stringStament += fieldName + ", ";	
-	 					}
-	 					counter++;
-	 					checker = 1;
-	 				}else{
-	 				}
-	 			}
-				if(checker == 0){
-					throw "Invalid Field";
- 				}
-	 		}
-	 		stringStament += ") VALUES (";
-	 		counter=0;
-	 		for(var tempfields in this.fields){
-	 			var checker = 0;
-	 			for (var fieldValue in object) {
-	 				if((this.fields[tempfields].type) == typeof(object[fieldValue])){
-	 					if (counter == Object.keys(object).length-1) {
-	 						stringStament += "'"+ object[fieldValue]+"'";
-	 					}else{
-	 						stringStament += "'"+ object[fieldValue] + "', ";	
-	 					}
-	 					counter++;	
-	 					checker = 1;	
-	 				}
-	 			}	
-	 			if(checker == 0){
-	 				throw "Invalid Type of Value";
-	 			}
-	 		}	 			
-	 		stringStament += ");";
-	 		console.log(stringStament);
-	 	}
-	 };
-
-
+	 
 	  /**
 	   * Ejecutar select
 	   *
@@ -432,7 +408,7 @@ var table = function (definition) {
 	 		if (object.where && Object.keys(object.where).length >0){
 	 			stringStament += _parseWhere(object.where);
 	 		} else if (object.hasOwnProperty("id")) {
-				stringStament += " WHERE ID = " object.id;
+				stringStament += " WHERE ID = " + object.id;
 	 		} else {
 	 			throw "Cannot delete all the data";
 	 		}
@@ -476,4 +452,4 @@ var Field = function (definition) {
 	this.isForeignKey = definition.isForeignKey;
 	this.hasNull = definition.hasNull === undefined ? true : definition.hasNull;
 };
-module.exports = table;
+//module.exports = table;
