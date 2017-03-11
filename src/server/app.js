@@ -27,7 +27,6 @@ var config = {
 };
 
 // Just for test
-<<<<<<< HEAD
 var myTable = new table({
 	name: "USERS",
 	fields: {
@@ -125,7 +124,6 @@ var myTable = new table({
 // });
 
 
->>>>>>> 7f865a04e4aa5f990b9cc2fb5d9956b24a96cdff
 // myTable.CREATE2({
 // 	name: "Cesar",
 // 	userName: "cesar",
