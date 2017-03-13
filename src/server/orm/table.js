@@ -374,7 +374,6 @@ var sql = require("mssql");
 	 };
 
 
->>>>>>> 7f865a04e4aa5f990b9cc2fb5d9956b24a96cdff
 	  /**
 	   * Ejecutar select
 	   *
@@ -629,4 +628,3 @@ module.exports = table;
 // 		}
 // 	}
 // });
->>>>>>> 7f865a04e4aa5f990b9cc2fb5d9956b24a96cdff
