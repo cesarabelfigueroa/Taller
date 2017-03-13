@@ -10,8 +10,9 @@ export class AuthenticateService {
 
 	constructor(private http: Http) { }
 
-	public getUsers(): Observable<any> {
-		return this.http.get('/user').map(res => res.json());
+	getUsers(user : any): Observable<any> {
+		console.log(user);
+		return this.http.get('/user?email=' + user.email+ '&password=' + user.password).map(res => res.json());
 	}
 
 	getTable(): Observable<any> {

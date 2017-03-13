@@ -43,8 +43,12 @@ app.get('/assets/images/*', function(request, response) {
 
 app.get('/user', function(request, response) {
 	user.READ({
-		fields: ["id", "userName"]
-	});
+		fields: [],
+		where: {
+			email: request.query.email,
+			password: request.query.password
+		}
+	}, response);
 });
 
 
@@ -59,15 +63,16 @@ module.exports = app;
 
 // Create the Service
 
-
- myTable.CREATE([{
- 	name: "Cesar",
- 	userName: "cesar",
- 	password: "12345",
- 	email: "cesads@hola.com"
-},{
- 	name: "Cesar",
- 	userName: "cesar",
- 	password: "12345",
- 	email: "cesads@hola.com"
-}]);
+/* 
+	 myTable.CREATE([{
+	 	name: "Cesar",
+	 	userName: "cesar",
+	 	password: "12345",
+	 	email: "cesads@hola.com"
+	},{
+	 	name: "Cesar",
+	 	userName: "cesar",
+	 	password: "12345",
+	 	email: "cesads@hola.com"
+	}]);
+	*/

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute} from '@angular/router';
 import { AuthenticateService } from '../../services/authenticate.service';
 import { NavbarComponent } from '../navbar/navbar.component';
 
@@ -11,14 +11,25 @@ import { NavbarComponent } from '../navbar/navbar.component';
 	entryComponents: [NavbarComponent]
 })
 
-export class HomeComponent {
+export class HomeComponent  implements OnInit{
 	private router;
+	private route;
 	private type;
 	private promotions;
 	private navbarItems;
+	private user;
 
-	constructor(dataService: AuthenticateService, router: Router) {
+	constructor(dataService: AuthenticateService, router: Router, route: ActivatedRoute) {
 		this.router = router;
+		this.route = route;
+
+		this.route.params.subscribe(params => {
+			this.user = params['data'];
+			console.log(params);
+		});
+
+		
+
 
 		this.promotions = [{
 			name: 'Food 2*1',
@@ -50,5 +61,12 @@ export class HomeComponent {
 		}, {
 			name: 'Restaurantes'
 		}]
+	}
+
+	ngOnInit() {
+		this.route.params.subscribe(params => {
+			console.log(params); // (+) converts string 'id' to a number
+			// In a real app: dispatch action to load the details here.
+		});
 	}
 }
