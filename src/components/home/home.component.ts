@@ -1,19 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticateService } from '../../services/authenticate.service';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
 	selector: 'app-home',
 	templateUrl: './home.component.html',
 	styleUrls: ['./home.component.css'],
-	providers: [AuthenticateService]
+	providers: [AuthenticateService],
+	entryComponents: [NavbarComponent]
 })
 
 export class HomeComponent {
 	private router;
 	private type;
 	private promotions;
-	private menubar;
+	private navbarItems;
 
 	constructor(dataService: AuthenticateService, router: Router) {
 		this.router = router;
@@ -38,7 +40,7 @@ export class HomeComponent {
 			endDate: new Date()
 		}];
 
-		this.menubar = [{
+		this.navbarItems = [{
 			name: 'Principal',
 			isActive: true
 		}, {
@@ -46,7 +48,7 @@ export class HomeComponent {
 		}, {
 			name: 'Contact'
 		}, {
-			name: 'Restarantes'
+			name: 'Restaurantes'
 		}]
 	}
 }

@@ -10,11 +10,14 @@ export class AuthenticateService {
 
 	constructor(private http: Http) { }
 
-	getUsers(): Observable<any> {
-		return this.http.get('/users').map(res => res.json());
+	public getUsers(): Observable<any> {
+		return this.http.get('/user').map(res => res.json());
 	}
 
 	getTable(): Observable<any> {
 		return this.http.get('/table').map(res => res.json());
 	}
+
+
+
 }

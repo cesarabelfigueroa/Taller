@@ -1,30 +1,19 @@
-<div class="ui inverted vertical masthead center aligned segment">
-  <div class="ui container">
-    <div class="ui large secondary inverted pointing menu">
-      <a class="toc item">
-        <i class="sidebar icon"></i>
-      </a>
-      <a  class="item"
-        *ngFor="let element of menubar">{{element.name}}
-      </a>
-    </div>
-  </div>
-</div>
+<app-navbar [items] ="navbarItems" ></app-navbar>
 <div class="ui grid">
-  <div class="row">
-    <div class="column">
-      <div class="ui huge message page grid center aligned">
-        <select class="ui search dropdown">
-          <option value="">State</option>
-          <option value="AL">Alabama</option>
-        </select>
-        <div class="ui left icon action input">
-          <input type="text" placeholder="Order #">
-          <div class="ui blue submit button">Search</div>
-        </div>
+<div class="row">
+  <div class="column">
+    <div class="ui huge message page grid center aligned">
+      <select class="ui search dropdown">
+        <option value=""></option>
+        <option *ngFor="let option of searchOptions" value="{{option.value}}" >Promociones</option>
+      </select>
+      <div class="ui left icon action input">
+        <input type="text" placeholder="Order #">
+        <div class="ui blue submit button">Go</div>
       </div>
     </div>
   </div>
+</div>
 </div>
 <div class="ui hidden divider"></div>
 <div class="ui container">
@@ -40,7 +29,7 @@
         </div>
       </div>
       <div class="extra content">
-        <span class="date">{{promotion.endDate  | date }}</span>
+        <span class="date">{{promotion.initDate | date }} - {{promotion.endDate  | date }}</span>
       </div>
     </div>
   </div>

@@ -22,6 +22,8 @@ export class LoginComponent {
 	}
 
 	submitLogin() {
-		this.router.navigate(['/home/'])
+
+		console.log(AuthenticateService);
+		
 	}
 }

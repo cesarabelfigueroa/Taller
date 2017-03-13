@@ -7,8 +7,9 @@ import { LoginComponent } from './components/login/login.controller';
 import { AppComponent } from './components/app/app.controller';
 import { AuthenticateService } from './services/authenticate.service';
 import { SignUpComponent } from './components/signup/signup.component';
+import { NavbarComponent } from './components/navbar/navbar.component';
 import { routing } from './routes'
-import {HashLocationStrategy, LocationStrategy, Location} from '@angular/common';
+import { HashLocationStrategy, LocationStrategy, Location } from '@angular/common';
 
 
 @NgModule({
@@ -16,7 +17,8 @@ import {HashLocationStrategy, LocationStrategy, Location} from '@angular/common'
     AppComponent,
     HomeComponent,
     LoginComponent,
-    SignUpComponent
+    SignUpComponent,
+    NavbarComponent
   ],
   imports: [
     routing,
@@ -24,9 +26,11 @@ import {HashLocationStrategy, LocationStrategy, Location} from '@angular/common'
     FormsModule,
     HttpModule
   ],
-  exports: [],
+  exports: [
+    NavbarComponent
+  ],
   providers: [AuthenticateService,
-    {provide: LocationStrategy, useClass: HashLocationStrategy}
+    { provide: LocationStrategy, useClass: HashLocationStrategy }
   ],
   bootstrap: [AppComponent]
 })
